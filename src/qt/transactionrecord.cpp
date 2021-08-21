@@ -371,7 +371,7 @@ void TransactionRecord::updateStatus(const CWalletTx &wtx, int chainLockHeight)
             int64_t maturityTime = (wtx.nTimeReceived + ftx.lockTime);
 
             //transaction depth in chain against maturity OR relative seconds of transaction against lockTime
-            if (status.cur_num_blocks >= maturityBlock && GetAdjustedTime() >= maturityTime) {
+            if (status.cur_num_blocks >= maturityBlock || GetAdjustedTime() >= maturityTime) {
                 status.status = TransactionStatus::Confirmed;
             } else {
                 status.countsForBalance = false;
