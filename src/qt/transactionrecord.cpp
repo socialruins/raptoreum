@@ -368,8 +368,7 @@ void TransactionRecord::updateStatus(const CWalletTx &wtx, int chainLockHeight)
         {
             int txBlock = pindex ? pindex->nHeight : std::numeric_limits<int>::max();
             int maturityBlock = (txBlock + ftx.maturity); //tx block height + maturity
-            int64_t maturityTime = (wtx.nTimeReceived + ftx.lockTime); //tx time + locked seconds
-            bool lockedByBlock = false;
+            int64_t maturityTime = (wtx.nTimeReceived + ftx.lockTime);
 
             //transaction depth in chain against maturity OR relative seconds of transaction against lockTime
             if (status.cur_num_blocks >= maturityBlock && GetAdjustedTime() >= maturityTime) {
@@ -379,11 +378,10 @@ void TransactionRecord::updateStatus(const CWalletTx &wtx, int chainLockHeight)
                //display transaction is mature in x blocks or transaction is mature in days hh:mm:ss
                 if(maturityBlock >= status.cur_num_blocks)
                 {
-                    lockedByBlock = true;
                     status.status = TransactionStatus::OpenUntilBlock;
                     status.open_for = maturityBlock; 
                 }
-                if(!lockedByBlock && maturityTime >= GetAdjustedTime())
+                if(maturityTime >= GetAdjustedTime())
                 {
                     status.status = TransactionStatus::OpenUntilDate;
                     status.open_for = maturityTime;
