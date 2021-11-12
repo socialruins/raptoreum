@@ -4666,6 +4666,8 @@ std::map<CTxDestination, CAmount> CWallet::GetAddressBalances()
             if (pcoin->IsCoinBase() && pcoin->GetBlocksToMaturity() > 0)
                 continue;
 
+
+
             int nDepth = pcoin->GetDepthInMainChain();
             if ((nDepth < (pcoin->IsFromMe(ISMINE_ALL) ? 0 : 1)) && !pcoin->IsLockedByInstantSend())
                 continue;
@@ -4676,6 +4678,8 @@ std::map<CTxDestination, CAmount> CWallet::GetAddressBalances()
                 if (!IsMine(pcoin->tx->vout[i]))
                     continue;
                 if(!ExtractDestination(pcoin->tx->vout[i].scriptPubKey, addr))
+                    continue;
+                if (!pcoin->isFutureSpendable(i))
                     continue;
 
                 CAmount n = IsSpent(walletEntry.first, i) ? 0 : pcoin->tx->vout[i].nValue;
