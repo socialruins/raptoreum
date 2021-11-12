@@ -1,4 +1,5 @@
 // Copyright (c) 2011-2014 The Bitcoin Core developers
+// Copyright (c) 2020-2021 The Raptoreum Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -21,7 +22,8 @@ TransactionFilterProxy::TransactionFilterProxy(QObject *parent) :
     dateFrom(MIN_DATE.toTime_t()),
     dateTo(MAX_DATE.toTime_t()),
     addrPrefix(),
-    typeFilter(COMMON_TYPES),
+    //typeFilter(COMMON_TYPES),
+    typeFilter(ALL_TYPES),
     watchOnlyFilter(WatchOnlyFilter_All),
     instantsendFilter(InstantSendFilter_All),
     minAmount(0),
