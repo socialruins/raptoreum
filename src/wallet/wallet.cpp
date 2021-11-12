@@ -1860,7 +1860,7 @@ int64_t CWalletTx::GetTxTime() const
 }
 
 bool CWalletTx::isFutureSpendable(unsigned int outputIndex) const {
-	bool isCoinSpenable;
+	bool isCoinSpendable;
 	if (tx->nType == TRANSACTION_FUTURE) {
 		int maturity = GetDepthInMainChain();
 		int64_t adjustCurrentTime = GetAdjustedTime();
@@ -1870,18 +1870,18 @@ bool CWalletTx::isFutureSpendable(unsigned int outputIndex) const {
 			if (futureTx.lockOutputIndex == outputIndex) {
 				bool isBlockMature = futureTx.maturity > 0 && maturity >= futureTx.maturity;
 				bool isTimeMature = futureTx.lockTime > 0 && adjustCurrentTime - confirmedTime >= futureTx.lockTime;
-				isCoinSpenable = isBlockMature || isTimeMature;
+				isCoinSpendable = isBlockMature || isTimeMature;
 			} else {
-				isCoinSpenable = true;
+				isCoinSpendable = true;
 			}
 		} else {
-			isCoinSpenable = false;
+			isCoinSpendable = false;
 		}
 
 	} else {
-		isCoinSpenable = true;
+		isCoinSpendable = true;
 	}
-	return isCoinSpenable;
+	return isCoinSpendable;
 }
 
 int CWalletTx::GetRequestCount() const
@@ -2219,7 +2219,7 @@ CAmount CWalletTx::GetAvailableCredit(bool fUseCache) const
     uint256 hashTx = GetHash();
     for (unsigned int i = 0; i < tx->vout.size(); i++)
     {
-        if (!pwallet->IsSpent(hashTx, i))
+        if (!pwallet->IsSpent(hashTx, i) || isFutureSpendable(i))
         {
             const CTxOut &txout = tx->vout[i];
             nCredit += pwallet->GetCredit(txout, ISMINE_SPENDABLE);
@@ -2262,7 +2262,7 @@ CAmount CWalletTx::GetAvailableWatchOnlyCredit(const bool& fUseCache) const
     CAmount nCredit = 0;
     for (unsigned int i = 0; i < tx->vout.size(); i++)
     {
-        if (!pwallet->IsSpent(GetHash(), i))
+        if (!pwallet->IsSpent(GetHash(), i) || isFutureSpendable(i))
         {
             const CTxOut &txout = tx->vout[i];
             nCredit += pwallet->GetCredit(txout, ISMINE_WATCH_ONLY);
@@ -2796,8 +2796,8 @@ void CWallet::AvailableCoins(std::vector<COutput> &vCoins, bool fOnlySafe, const
 
                 bool fSpendableIn = ((mine & ISMINE_SPENDABLE) != ISMINE_NO) || (coinControl && coinControl->fAllowWatchOnly && (mine & ISMINE_WATCH_SOLVABLE) != ISMINE_NO);
                 bool fSolvableIn = (mine & (ISMINE_SPENDABLE | ISMINE_WATCH_SOLVABLE)) != ISMINE_NO;
-				bool isCoinSpenable = pcoin->isFutureSpendable(i);
-                vCoins.push_back(COutput(pcoin, i, nDepth, fSpendableIn, fSolvableIn, safeTx, pcoin->tx->nType == TRANSACTION_FUTURE, isCoinSpenable));
+				bool isCoinSpendable = pcoin->isFutureSpendable(i);
+                vCoins.push_back(COutput(pcoin, i, nDepth, fSpendableIn, fSolvableIn, safeTx, pcoin->tx->nType == TRANSACTION_FUTURE, isCoinSpendable));
 
                 // Checks the sum amount of all UTXO's.
                 if (nMinimumSumAmount != MAX_MONEY) {
